@@ -3,73 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECG Website - ยินดีต้อนรับ</title>
+    <title>ECG Signal Upload Dashboard</title>
     <style>
+        /* --- Base & Reset Styles --- */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }
-        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+        }
+
+        body {
+            background-color: #f4f7f9;
             color: #333;
-            line-height: 1.6;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-top: 5px solid #e74c3c;
+
+        /* --- Navigation Bar --- */
+        .navbar {
+            background-color: #ffffff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-bottom: 1px solid #eef2f5;
         }
-        h1 {
-            color: #e74c3c;
-            margin-bottom: 15px;
-            font-size: 24px;
+
+        .navbar-brand {
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #e74c3c; /* สีแดงสไตล์ Medical/Heart rate */
         }
-        p {
+
+        .navbar-brand span {
+            color: #2c3e50;
+        }
+
+        /* --- Main Container --- */
+        .main-container {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(166, 173, 201, 0.2);
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 26px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            color: #7f8c8d;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Dropzone (พื้นที่อัปโหลดไฟล์) --- */
+        .dropzone-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 50px 20px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dropzone-area:hover, .dropzone-area.dragover {
+            background-color: #ebf5fb;
+            border-color: #2980b9;
+        }
+
+        .upload-icon {
+            font-size: 50px;
             margin-bottom: 15px;
-            color: #555;
+            display: inline-block;
         }
-        .card {
-            background: #f9f9f9;
-            border-left: 4px solid #3498db;
+
+        .dropzone-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+
+        .dropzone-subtext {
+            font-size: 13px;
+            color: #95a5a6;
+            margin-bottom: 20px;
+        }
+
+        /* ซ่อน Input แบบดั้งเดิมไว้ */
+        #file-input {
+            display: none;
+        }
+
+        .browse-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .browse-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* --- File Info Display --- */
+        .file-info-box {
+            margin-top: 25px;
+            background-color: #f1f9fe;
+            border: 1px solid #d4edf9;
             padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
+            border-radius: 6px;
+            display: none; /* ซ่อนไว้ก่อนจนกว่าจะเลือกไฟล์ */
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
         }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* --- Submit Button --- */
+        .submit-btn {
+            width: 100%;
+            margin-top: 25px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #c0392b;
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        /* --- Footer --- */
         .footer {
             text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-            color: #aaa;
+            padding: 20px;
+            font-size: 13px;
+            color: #b2bec3;
+            background-color: #ffffff;
+            border-top: 1px solid #eef2f5;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>❤️ ECG Website Project</h1>
-        <p>ยินดีด้วยครับ! เว็บไซต์เริ่มต้นของคุณรันบนอินเทอร์เน็ตผ่าน GitHub Pages สำเร็จเรียบร้อยแล้ว</p>
-        
-        <div class="card">
-            <h3>📌 สิ่งที่ควรทำต่อไป:</h3>
-            <p>คุณสามารถแก้ไขไฟล์ <code>index.html</code> นี้ในคอมพิวเตอร์ของคุณเพื่อเปลี่ยนเนื้อหา เพิ่มข้อมูลงานวิจัย คลื่นไฟฟ้าหัวใจ (ECG) หรือใส่รูปภาพตามที่ต้องการ จากนั้นอัปโหลดไฟล์ที่แก้ไขแล้วขึ้น GitHub อีกครั้ง หน้าเว็บก็จะอัปเดตอัตโนมัติครับ</p>
+    <!-- แถบเมนูด้านบน -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            ❤️ <span>ECG<strong>Website</strong></span>
         </div>
+    </nav>
 
-        <p>สร้างขึ้นเพื่อทดสอบการเชื่อมต่อระบบคลังโค้ดและการเปิดใช้งาน Hosting ฟรี</p>
-        
-        <div class="footer">
-            © 2026 ECGwebsite - พัฒนาโดย napatjoijinda888
+    <!-- ส่วนเนื้อหาหลัก -->
+    <main class="main-container">
+        <div class="dashboard-card">
+            <div class="dashboard-header">
+                <h1>อัปโหลดข้อมูลคลื่นไฟฟ้าหัวใจ (ECG Data)</h1>
+                <p>รองรับไฟล์ข้อมูลสัญญาณในรูปแบบ .csv, .txt หรือ .mat เพื่อนำไปประมวลผลต่อ</p>
+            </div>
+
+            <!-- กล่องลากไฟล์วาง (Dropzone) -->
+            <div class="dropzone-area" id="dropzone">
+                <span class="upload-icon">📊</span>
+                <p class="dropzone-text">ลากไฟล์ของคุณมาวางที่นี่</p>
+                <p class="dropzone-subtext">หรือคลิกเพื่อเลือกไฟล์จากคอมพิวเตอร์ของคุณ</p>
+                
+                <input type="file" id="file-input" accept=".csv, .txt, .mat">
+                <button type="button" class="browse-btn" onclick="document.getElementById('file-input').click()">เลือกไฟล์</button>
+            </div>
+
+            <!-- กล่องแสดงสถานะเมื่อเลือกไฟล์สำเร็จ -->
+            <div class="file-info-box" id="file-info">
+                <div class="file-details">
+                    <span class="file-icon">📄</span>
+                    <div>
+                        <div class="file-name" id="display-name">filename.csv</div>
+                        <div class="file-size" id="display-size">0 KB</div>
+                    </div>
+                </div>
+                <button type="button" class="remove-btn" id="remove-file-btn">ยกเลิก</button>
+            </div>
+
+            <!-- ปุ่มกดยืนยันอัปโหลด -->
+            <button type="button" class="submit-btn" id="upload-btn">เริ่มวิเคราะห์ข้อมูล (Process Signal)</button>
         </div>
-    </div>
+    </main>
 
+    <!-- ส่วนท้ายหน้าเว็บ -->
+    <footer class="footer">
+        © 2026 ECGwebsite Dashboard - สำหรับเพื่อการศึกษาวิจัยและพัฒนาเทคโนโลยีชีวการแพทย์
+    </footer>
+
+    <!-- ส่วนควบคุมพฤติกรรมหน้าเว็บ (JavaScript) -->
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const fileInfo = document.getElementById('file-info');
+        const displayName = document.getElementById('display-name');
+        const displaySize = document.getElementById('display-size');
+        const removeBtn = document.getElementById('remove-file-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+
+        // ฟังก์ชันจัดการขนาดไฟล์ให้แสดงหน่วยอ่านง่าย (KB/MB)
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // ฟังก์ชันแสดงข้อมูลไฟล์ที่ถูกเลือก
+        function handleFile(file) {
+            if (file) {
+                displayName.textContent = file.name;
+                displaySize.textContent = formatBytes(file.size);
+                fileInfo.style.display = 'flex'; // แสดงกล่องข้อมูลไฟล์
+            }
+        }
+
+        // เมื่อมีการคลิกเลือกไฟล์ผ่านปุ่ม Browse
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // ฟังก์ชันตรวจจับการลากไฟล์มาวาง (Drag & Drop)
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // ปุ่มยกเลิกไฟล์ที่เลือก
+        removeBtn.addEventListener('click', () => {
+            fileInput.value = ''; // ล้างข้อมูลไฟล์
+            fileInfo.style.display = 'none'; // ซ่อนกล่องข้อมูลไฟล์
+        });
+
+        // ปุ่มกดส่งข้อมูล (จำลองการทำงาน)
+        uploadBtn.addEventListener('click', () => {
+            if (fileInput.files.length === 0) {
+                alert('กรุณาเลือกไฟล์ข้อมูลสัญญาณก่อนกดส่งวิเคราะห์ครับ');
+            } else {
+                alert('รับไฟล์สำเร็จ! (เนื่องจากรันบน GitHub Pages ซึ่งเป็นเซิร์ฟเวอร์แบบ Static ส่วนรับข้อมูล Backend จะทำงานหลังจากเชื่อมต่อ API สำเร็จ)');
+            }
+        });
+    </script>
 </body>
 </html>
