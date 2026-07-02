@@ -230,11 +230,11 @@
             stroke-linecap: round;
         }
 
-        /* [ปรับปรุงปรุงใหม่] การตั้งค่ารูปภาพ Scatter Plot ให้จัดวางพอดีช่องและคมชัด */
+        /* การตั้งค่ารูปภาพ Scatter Plot ให้จัดวางพอดีช่องและคมชัด */
         .scatter-image-preview {
             max-width: 100%;
             max-height: 100%;
-            object-fit: contain; /* ป้องกันไม่ให้รูปเบี้ยวหรือผิดสัดส่วน */
+            object-fit: contain;
         }
 
         /* --- Page 2 Components --- */
@@ -374,11 +374,10 @@
                             </div>
                         </div>
 
-                        <!-- [เปลี่ยนใหม่] ส่วนแสดงรูปภาพ Scatter Plot จากภาพของคุณ -->
+                        <!-- ส่วนแสดงรูปภาพ Scatter Plot จากภาพของคุณ -->
                         <div class="plot-box">
                             <strong style="display:block; text-align:left; margin-bottom:5px; color:#34495e;">2. ECG Latent Feature Space (Scatter Plot Clustering)</strong>
                             <div class="plot-placeholder">
-                                <!-- ⚠️ เปลี่ยนชื่อ 'scatter_plot.png' ในบรรทัดล่างนี้ให้ตรงกับชื่อไฟล์ภาพของคุณจริงบน GitHub -->
                                 <img src="scatter_plot.png" alt="ECG Scatter Plot" class="scatter-image-preview">
                             </div>
                         </div>
