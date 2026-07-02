@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECG Signal Upload Dashboard</title>
+    <title>ECG Deep Learning Dashboard</title>
     <style>
         /* --- Base & Reset Styles --- */
         * {
@@ -15,7 +15,7 @@
 
         body {
             background-color: #f4f7f9;
-            color: #333;
+            color: #2c3e50;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -30,6 +30,7 @@
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
             border-bottom: 1px solid #eef2f5;
+            z-index: 10;
         }
 
         .navbar-brand {
@@ -38,167 +39,308 @@
             gap: 10px;
             font-size: 20px;
             font-weight: 700;
-            color: #e74c3c; /* สีแดงสไตล์ Medical/Heart rate */
+            color: #e74c3c;
         }
 
         .navbar-brand span {
             color: #2c3e50;
         }
 
-        /* --- Main Container --- */
-        .main-container {
-            flex: 1;
-            max-width: 800px;
-            width: 100%;
-            margin: 40px auto;
-            padding: 0 20px;
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
         }
 
-        .dashboard-card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(166, 173, 201, 0.2);
-            text-align: center;
-        }
-
-        .dashboard-header h1 {
-            font-size: 26px;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-header p {
-            color: #7f8c8d;
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 16px;
             font-size: 15px;
-            margin-bottom: 30px;
-        }
-
-        /* --- Dropzone (พื้นที่อัปโหลดไฟล์) --- */
-        .dropzone-area {
-            border: 2px dashed #3498db;
-            border-radius: 10px;
-            padding: 50px 20px;
-            background-color: #f8fafc;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .dropzone-area:hover, .dropzone-area.dragover {
-            background-color: #ebf5fb;
-            border-color: #2980b9;
-        }
-
-        .upload-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .dropzone-text {
-            font-size: 16px;
             font-weight: 600;
-            color: #34495e;
+            color: #7f8c8d;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #e74c3c;
+            border-bottom-color: #e74c3c;
+        }
+
+        /* --- Main App Layout --- */
+        .app-layout {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 115px);
+        }
+
+        /* --- Sidebar (โมเดล Deep Learning) --- */
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #eef2f5;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #95a5a6;
+            font-weight: 700;
             margin-bottom: 5px;
         }
 
-        .dropzone-subtext {
-            font-size: 13px;
-            color: #95a5a6;
-            margin-bottom: 20px;
+        .model-btn {
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            color: #475569;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* ซ่อน Input แบบดั้งเดิมไว้ */
-        #file-input {
-            display: none;
+        .model-btn:hover {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
         }
+
+        .model-btn.active {
+            background-color: #ebf5fb;
+            border-color: #3498db;
+            color: #2980b9;
+        }
+
+        .model-btn::after {
+            content: '🧠';
+            font-size: 14px;
+        }
+
+        /* --- Main Content Area --- */
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page-content {
+            display: none; /* ซ่อนหน้าไว้เพื่อสลับด้วย JS */
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* --- Cards & Panels --- */
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(166, 173, 201, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- Page 1 Components (Upload & Visuals) --- */
+        .dropzone-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px 20px;
+            background-color: #f8fafc;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dropzone-area:hover {
+            background-color: #ebf5fb;
+        }
+
+        #file-input { display: none; }
 
         .browse-btn {
             background-color: #3498db;
             color: white;
-            padding: 10px 24px;
+            padding: 8px 20px;
             border: none;
             border-radius: 6px;
-            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            margin-top: 10px;
         }
 
-        .browse-btn:hover {
-            background-color: #2980b9;
-        }
-
-        /* --- File Info Display --- */
-        .file-info-box {
-            margin-top: 25px;
-            background-color: #f1f9fe;
-            border: 1px solid #d4edf9;
-            padding: 15px;
-            border-radius: 6px;
-            display: none; /* ซ่อนไว้ก่อนจนกว่าจะเลือกไฟล์ */
-            align-items: center;
-            justify-content: space-between;
-            text-align: left;
-        }
-
-        .file-details {
+        /* Visualization Sections */
+        .visual-container {
             display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .file-icon {
-            font-size: 24px;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 14px;
-            word-break: break-all;
-        }
-
-        .file-size {
-            font-size: 12px;
-            color: #7f8c8d;
-        }
-
-        .remove-btn {
-            background: none;
-            border: none;
-            color: #e74c3c;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* --- Submit Button --- */
-        .submit-btn {
-            width: 100%;
+            flex-direction: column;
+            gap: 25px;
             margin-top: 25px;
-            background-color: #e74c3c;
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
-            transition: all 0.2s;
         }
 
-        .submit-btn:hover {
-            background-color: #c0392b;
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+        .plot-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .plot-placeholder {
+            width: 100%;
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* SVG จำลองสัญญาณคลื่นไฟฟ้าหัวใจ (ECG Waveform) */
+        .ecg-svg {
+            width: 100%;
+            height: 100%;
+            stroke: #e74c3c;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* จำลองรูปภาพ Scalogram */
+        .scalogram-mock {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #9b59b6, #e74c3c, #f1c40f);
+            opacity: 0.85;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .scalogram-mock span {
+            background: rgba(255,255,255,0.9);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* --- Page 2 Components (Metrics & Confusion Matrix) --- */
+        .matrix-metrics-grid {
+            display: grid;
+            grid-template-columns: 1.2f 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 850px) {
+            .matrix-metrics-grid { grid-template-columns: 1fr; }
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #eef2f5; }
+        }
+
+        /* Table Design */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Confusion Matrix Design */
+        .matrix-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            grid-template-rows: repeat(3, 70px);
+            gap: 4px;
+            background-color: #cbd5e1;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .matrix-cell {
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* ใช้ความเข้มของสีตามความถูกต้อง (True Positives สูงจะเข้มมาก) */
+        .cell-high { background-color: #3498db; color: white; }
+        .cell-med { background-color: #aed6f1; }
+        .cell-low { background-color: #f2f4f4; color: #7f8c8d; font-weight: normal; }
+
+        .matrix-label-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 5px;
+            padding-left: 0px;
+        }
+        .matrix-label-text {
+            width: 70px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #64748b;
         }
 
         /* --- Footer --- */
         .footer {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             font-size: 13px;
             color: #b2bec3;
             background-color: #ffffff;
@@ -208,120 +350,181 @@
 </head>
 <body>
 
-    <!-- แถบเมนูด้านบน -->
+    <!-- แถบนำทางและแท็บสลับหน้า -->
     <nav class="navbar">
         <div class="navbar-brand">
-            ❤️ <span>ECG<strong>Website</strong></span>
+            ❤️ <span>ECG<strong>AI-Predictor</strong></span>
+        </div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchPage('page1', this)">หน้าแรก: การประมวลผลข้อมูล</button>
+            <button class="tab-btn" onclick="switchPage('page2', this)">หน้าที่สอง: ผลลัพธ์และการประเมิน</button>
         </div>
     </nav>
 
-    <!-- ส่วนเนื้อหาหลัก -->
-    <main class="main-container">
-        <div class="dashboard-card">
-            <div class="dashboard-header">
-                <h1>อัปโหลดข้อมูลคลื่นไฟฟ้าหัวใจ (ECG Data)</h1>
-                <p>รองรับไฟล์ข้อมูลสัญญาณในรูปแบบ .csv, .txt หรือ .mat เพื่อนำไปประมวลผลต่อ</p>
-            </div>
+    <!-- โครงสร้างหลักของระบบ -->
+    <div class="app-layout">
+        
+        <!-- แถบด้านซ้าย: รายชื่อโมเดล Deep Learning สำหรับวิเคราะห์สัญญาณ -->
+        <aside class="sidebar">
+            <h2 class="sidebar-title">เลือกโมเดลวิเคราะห์</h2>
+            <button class="model-btn active" onclick="selectModel('CNN1D', this)">CNN 1D (Time-Series)</button>
+            <button class="model-btn" onclick="selectModel('CNN2D', this)">CNN 2D (Scalogram)</button>
+            <button class="model-btn" onclick="selectModel('LSTM', this)">LSTM (RNN Sequence)</button>
+        </aside>
 
-            <!-- กล่องลากไฟล์วาง (Dropzone) -->
-            <div class="dropzone-area" id="dropzone">
-                <span class="upload-icon">📊</span>
-                <p class="dropzone-text">ลากไฟล์ของคุณมาวางที่นี่</p>
-                <p class="dropzone-subtext">หรือคลิกเพื่อเลือกไฟล์จากคอมพิวเตอร์ของคุณ</p>
-                
-                <input type="file" id="file-input" accept=".csv, .txt, .mat">
-                <button type="button" class="browse-btn" onclick="document.getElementById('file-input').click()">เลือกไฟล์</button>
-            </div>
+        <!-- พื้นที่แสดงเนื้อหาหลัก -->
+        <main class="content-area">
 
-            <!-- กล่องแสดงสถานะเมื่อเลือกไฟล์สำเร็จ -->
-            <div class="file-info-box" id="file-info">
-                <div class="file-details">
-                    <span class="file-icon">📄</span>
-                    <div>
-                        <div class="file-name" id="display-name">filename.csv</div>
-                        <div class="file-size" id="display-size">0 KB</div>
+            <!-- ================= หน้าที่ 1 ================= -->
+            <div id="page1" class="page-content active">
+                <div class="card">
+                    <div class="card-title">📥 อัปโหลดสัญญาณคลื่นไฟฟ้าหัวใจ</div>
+                    <div class="dropzone-area" onclick="document.getElementById('file-input').click()">
+                        <p style="font-size: 35px; margin-bottom: 10px;">📊</p>
+                        <p><strong>คลิกเพื่อเลือกไฟล์ข้อมูลสัญญาณ</strong> (.csv, .mat, .txt)</p>
+                        <p style="font-size: 13px; color: #95a5a6; margin-top: 5px;">ระบบจะทำการวิเคราะห์สัญญาณโดยอัตโนมัติด้วยโมเดลที่เลือกด้านซ้าย</p>
+                        <input type="file" id="file-input" accept=".csv, .txt, .mat">
                     </div>
                 </div>
-                <button type="button" class="remove-btn" id="remove-file-btn">ยกเลิก</button>
+
+                <div class="card">
+                    <div class="card-title">📈 ผลการพล็อตสเปกตรัมและสัญญาณ (Signal Visualization)</div>
+                    
+                    <div class="visual-container">
+                        <!-- ส่วนแสดงรูป Waveform -->
+                        <div class="plot-box">
+                            <strong>1. สัญญาณคลื่นหัวใจดั้งเดิม (ECG Waveform)</strong>
+                            <div class="plot-placeholder">
+                                <svg class="ecg-svg" viewBox="0 0 1000 200">
+                                    <!-- ลายเส้นจำลองสัญญาณ ECG -->
+                                    <path d="M 0 100 L 100 100 L 120 100 L 130 70 L 140 120 L 150 100 L 250 100 L 270 100 L 280 20 L 295 180 L 310 100 L 330 110 L 350 100 L 450 100 L 470 100 L 480 70 L 490 120 L 500 100 L 600 100 L 620 100 L 630 20 L 645 180 L 660 100 L 680 110 L 700 100 L 800 100 Z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- ส่วนแสดงรูป Scalogram -->
+                        <div class="plot-box">
+                            <strong>2. ภาพสแกโลแกรมจากการแปลง CWT (Scalogram Image)</strong>
+                            <div class="plot-placeholder">
+                                <div class="scalogram-mock">
+                                    <span>Continuous Wavelet Transform (CWT) Spectrum Visualized</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- ปุ่มกดยืนยันอัปโหลด -->
-            <button type="button" class="submit-btn" id="upload-btn">เริ่มวิเคราะห์ข้อมูล (Process Signal)</button>
-        </div>
-    </main>
+            <!-- ================= หน้าที่ 2 ================= -->
+            <div id="page2" class="page-content">
+                <!-- ตารางความแม่นยำและเมทริกซ์ความสับสนวางอยู่ด้านบน -->
+                <div class="card">
+                    <div class="card-title">📊 ผลลัพธ์และประสิทธิภาพของโมเดล (Model Evaluation)</div>
+                    
+                    <div class="matrix-metrics-grid">
+                        
+                        <!-- ฝั่งซ้าย: ตาราง Confusion Matrix (แมทริกซ์การจำแนกคลาส) -->
+                        <div class="matrix-container">
+                            <p style="font-weight: 600; margin-bottom: 10px; font-size: 14px; color: #475569;">Confusion Matrix (คลาสหัวใจปกติ และหัวใจเต้นผิดจังหวะ)</p>
+                            <div class="matrix-label-row">
+                                <div class="matrix-label-text">Normal</div>
+                                <div class="matrix-label-text">PVC</div>
+                                <div class="matrix-label-text">SVT</div>
+                            </div>
+                            <div class="matrix-grid">
+                                <div class="matrix-cell cell-high">94%<span style="font-size:9px">Normal</span></div>
+                                <div class="matrix-cell cell-low">4%</div>
+                                <div class="matrix-cell cell-low">2%</div>
+                                
+                                <div class="matrix-cell cell-low">5%</div>
+                                <div class="matrix-cell cell-high">91%<span style="font-size:9px">PVC</span></div>
+                                <div class="matrix-cell cell-low">4%</div>
+                                
+                                <div class="matrix-cell cell-low">3%</div>
+                                <div class="matrix-cell cell-low">5%</div>
+                                <div class="matrix-cell cell-high">92%<span style="font-size:9px">SVT</span></div>
+                            </div>
+                        </div>
+
+                        <!-- ฝั่งขวา: ตารางแสดงค่าพารามิเตอร์ต่างๆ -->
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 10px; font-size: 14px; color: #475569;">Classification Report Metrics</p>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Arrhythmia Class</th>
+                                        <th>Precision</th>
+                                        <th>Recall</th>
+                                        <th>F1-Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Normal Beat</strong></td>
+                                        <td>0.95</td>
+                                        <td>0.94</td>
+                                        <td>0.94</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>PVC (เต้นก่อนเวลา)</strong></td>
+                                        <td>0.91</td>
+                                        <td>0.91</td>
+                                        <td>0.91</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>SVT (เต้นเร็วเหนือห้องล่าง)</strong></td>
+                                        <td>0.93</td>
+                                        <td>0.92</td>
+                                        <td>0.92</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- การสรุปผลเพิ่มเติมย่อยลงมาด้านล่าง -->
+                <div class="card">
+                    <div class="card-title">💡 สรุปความเห็นของระบบปัญญาประดิษฐ์</div>
+                    <p style="font-size: 15px; color: #555;">จากการประมวลผลสัญญาณคลื่นไฟฟ้าหัวใจที่ส่งเข้ามา โมเดลของคุณทำงานได้มีประสิทธิภาพเฉลี่ยคงที่ (Overall Accuracy: <strong>92.3%</strong>) เหมาะสำหรับใช้วิเคราะห์เบื้องต้นเพื่อคัดกรองผู้ป่วยโรคหัวใจเต้นผิดจังหวะกลุ่มเสี่ยง</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
     <!-- ส่วนท้ายหน้าเว็บ -->
     <footer class="footer">
-        © 2026 ECGwebsite Dashboard - สำหรับเพื่อการศึกษาวิจัยและพัฒนาเทคโนโลยีชีวการแพทย์
+        © 2026 ECGwebsite - พัฒนาขึ้นเพื่อระบบวิเคราะห์ปัญญาประดิษฐ์ทางการแพทย์ชีวการแพทย์
     </footer>
 
-    <!-- ส่วนควบคุมพฤติกรรมหน้าเว็บ (JavaScript) -->
+    <!-- ตัวควบคุมฟังก์ชันการคลิกสลับหน้าและโมเดลด้วย JavaScript -->
     <script>
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('file-input');
-        const fileInfo = document.getElementById('file-info');
-        const displayName = document.getElementById('display-name');
-        const displaySize = document.getElementById('display-size');
-        const removeBtn = document.getElementById('remove-file-btn');
-        const uploadBtn = document.getElementById('upload-btn');
-
-        // ฟังก์ชันจัดการขนาดไฟล์ให้แสดงหน่วยอ่านง่าย (KB/MB)
-        function formatBytes(bytes, decimals = 2) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        // ฟังก์ชันในการสลับหน้าเว็บ (หน้าแรก / หน้าสอง)
+        function switchPage(pageId, button) {
+            // ซ่อนทุกหน้าก่อน
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            // เอาแถบสีแดงของปุ่มเมนูออกทั้งหมด
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // เปิดแสดงหน้าต่างที่เลือก และเพิ่มไฮไลต์ให้ปุ่มเมนูนั้น
+            document.getElementById(pageId).classList.add('active');
+            button.classList.add('active');
         }
 
-        // ฟังก์ชันแสดงข้อมูลไฟล์ที่ถูกเลือก
-        function handleFile(file) {
-            if (file) {
-                displayName.textContent = file.name;
-                displaySize.textContent = formatBytes(file.size);
-                fileInfo.style.display = 'flex'; // แสดงกล่องข้อมูลไฟล์
-            }
+        // ฟังก์ชันคลิกเลือกเปลี่ยนโมเดลด้านซ้าย (CNN1D, CNN2D, LSTM)
+        function selectModel(modelName, button) {
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            alert('คุณได้เปลี่ยนไปใช้โมเดล: ' + modelName + ' เรียบร้อยแล้ว ระบบจะทำการจำลองผลการคำนวณใหม่ให้สอดคล้องกัน');
         }
-
-        // เมื่อมีการคลิกเลือกไฟล์ผ่านปุ่ม Browse
-        fileInput.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
-        });
-
-        // ฟังก์ชันตรวจจับการลากไฟล์มาวาง (Drag & Drop)
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
-
-        dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('dragover');
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        // ปุ่มยกเลิกไฟล์ที่เลือก
-        removeBtn.addEventListener('click', () => {
-            fileInput.value = ''; // ล้างข้อมูลไฟล์
-            fileInfo.style.display = 'none'; // ซ่อนกล่องข้อมูลไฟล์
-        });
-
-        // ปุ่มกดส่งข้อมูล (จำลองการทำงาน)
-        uploadBtn.addEventListener('click', () => {
-            if (fileInput.files.length === 0) {
-                alert('กรุณาเลือกไฟล์ข้อมูลสัญญาณก่อนกดส่งวิเคราะห์ครับ');
-            } else {
-                alert('รับไฟล์สำเร็จ! (เนื่องจากรันบน GitHub Pages ซึ่งเป็นเซิร์ฟเวอร์แบบ Static ส่วนรับข้อมูล Backend จะทำงานหลังจากเชื่อมต่อ API สำเร็จ)');
-            }
-        });
     </script>
 </body>
 </html>
