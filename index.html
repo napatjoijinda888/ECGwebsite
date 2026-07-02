@@ -1,8 +1,3 @@
-เปลี่ยนข้อความบนเมนูแท็บสลับหน้า หน้าต่างอัปโหลด หัวข้อกราฟ และตารางข้อมูลทั้งหมดให้เป็นภาษาอังกฤษ เพื่อให้ตัวเว็บดูเป็นสากลและเป็นระบบวิเคราะห์ทางการแพทย์ที่สมบูรณ์แบบยิ่งขึ้นครับ
-
-คุณสามารถคัดลอกโค้ดภาษาอังกฤษเต็มรูปแบบนี้ไปวางทับในไฟล์ `index.html` บน GitHub ได้เลยครับ:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,6 +204,9 @@
             margin-top: 10px;
             position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* 1. ECG Grid Background */
@@ -232,25 +230,12 @@
             stroke-linecap: round;
         }
 
-        /* 2. Scatter Plot Styles */
-        .scatter-svg {
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
+        /* [ปรับปรุงปรุงใหม่] การตั้งค่ารูปภาพ Scatter Plot ให้จัดวางพอดีช่องและคมชัด */
+        .scatter-image-preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* ป้องกันไม่ให้รูปเบี้ยวหรือผิดสัดส่วน */
         }
-
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .dot-normal { width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; }
-        .dot-pvc { width: 10px; height: 10px; background-color: #e67e22; border-radius: 50%; }
-        .dot-svt { width: 10px; height: 10px; background-color: #9b59b6; border-radius: 50%; }
 
         /* --- Page 2 Components --- */
         .matrix-metrics-grid {
@@ -389,54 +374,12 @@
                             </div>
                         </div>
 
-                        <!-- Scatter Plot Display -->
+                        <!-- [เปลี่ยนใหม่] ส่วนแสดงรูปภาพ Scatter Plot จากภาพของคุณ -->
                         <div class="plot-box">
                             <strong style="display:block; text-align:left; margin-bottom:5px; color:#34495e;">2. ECG Latent Feature Space (Scatter Plot Clustering)</strong>
                             <div class="plot-placeholder">
-                                <svg class="scatter-svg" viewBox="0 0 800 250">
-                                    <g stroke="#f1f5f9" stroke-width="1">
-                                        <line x1="50" y1="50" x2="750" y2="50" />
-                                        <line x1="50" y1="100" x2="750" y2="100" />
-                                        <line x1="50" y1="150" x2="750" y2="150" />
-                                        <line x1="50" y1="200" x2="750" y2="200" />
-                                        <line x1="225" y1="20" x2="225" y2="210" />
-                                        <line x1="400" y1="20" x2="400" y2="210" />
-                                        <line x1="575" y1="20" x2="575" y2="210" />
-                                    </g>
-
-                                    <line x1="50" y1="210" x2="760" y2="210" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="50" y1="20" x2="50" y2="210" stroke="#94a3b8" stroke-width="2" />
-                                    
-                                    <text x="750" y="230" fill="#64748b" font-size="11" font-weight="bold">Feature 1</text>
-                                    <text x="15" y="30" fill="#64748b" font-size="11" font-weight="bold" transform="rotate(-90 15 30)">Feature 2</text>
-
-                                    <!-- Normal Beat Group -->
-                                    <g fill="#2ecc71" opacity="0.8">
-                                        <circle cx="120" cy="60" r="6" /><circle cx="140" cy="45" r="5" /><circle cx="160" cy="70" r="5" />
-                                        <circle cx="180" cy="55" r="6" /><circle cx="150" cy="85" r="5" /><circle cx="210" cy="65" r="5" />
-                                        <circle cx="230" cy="40" r="6" /><circle cx="190" cy="80" r="5" /><circle cx="110" cy="80" r="5" />
-                                    </g>
-
-                                    <!-- PVC Group -->
-                                    <g fill="#e67e22" opacity="0.8">
-                                        <circle cx="550" cy="150" r="6" /><circle cx="580" cy="170" r="5" /><circle cx="620" cy="140" r="6" />
-                                        <circle cx="600" cy="180" r="5" /><circle cx="660" cy="165" r="5" /><circle cx="530" cy="175" r="6" />
-                                        <circle cx="640" cy="190" r="5" /><circle cx="570" cy="130" r="5" /><circle cx="610" cy="160" r="5" />
-                                    </g>
-
-                                    <!-- SVT Group -->
-                                    <g fill="#9b59b6" opacity="0.8">
-                                        <circle cx="350" cy="110" r="5" /><circle cx="380" cy="95" r="6" /><circle cx="410" cy="130" r="5" />
-                                        <circle cx="390" cy="120" r="5" /><circle cx="430" cy="100" r="6" /><circle cx="360" cy="135" r="5" />
-                                        <circle cx="450" cy="125" r="5" /><circle cx="330" cy="105" r="5" /><circle cx="420" cy="85" r="6" />
-                                    </g>
-                                </svg>
-                                
-                                <div class="chart-legend">
-                                    <div class="legend-item"><div class="dot-normal"></div> Normal Beat</div>
-                                    <div class="legend-item"><div class="dot-pvc"></div> PVC (Premature Ventricular Contraction)</div>
-                                    <div class="legend-item"><div class="dot-svt"></div> SVT (Supraventricular Tachycardia)</div>
-                                </div>
+                                <!-- ⚠️ เปลี่ยนชื่อ 'scatter_plot.png' ในบรรทัดล่างนี้ให้ตรงกับชื่อไฟล์ภาพของคุณจริงบน GitHub -->
+                                <img src="scatter_plot.png" alt="ECG Scatter Plot" class="scatter-image-preview">
                             </div>
                         </div>
                     </div>
@@ -448,8 +391,6 @@
                 <div class="card">
                     <div class="card-title">📊 Model Evaluation & Statistical Results</div>
                     <div class="matrix-metrics-grid">
-                        
-                        <!-- Confusion Matrix -->
                         <div class="matrix-container">
                             <p style="font-weight: 600; margin-bottom: 10px; font-size: 14px; color: #475569;">Confusion Matrix</p>
                             <div class="matrix-label-row">
@@ -470,7 +411,6 @@
                             </div>
                         </div>
 
-                        <!-- Classification Report Metrics -->
                         <div>
                             <p style="font-weight: 600; margin-bottom: 10px; font-size: 14px; color: #475569;">Classification Report Metrics</p>
                             <table class="data-table">
@@ -536,5 +476,3 @@
     </script>
 </body>
 </html>
-
-```
