@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG Website - ยินดีต้อนรับ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid #e74c3c;
+        }
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .card {
+            background: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>❤️ ECG Website Project</h1>
+        <p>ยินดีด้วยครับ! เว็บไซต์เริ่มต้นของคุณรันบนอินเทอร์เน็ตผ่าน GitHub Pages สำเร็จเรียบร้อยแล้ว</p>
+        
+        <div class="card">
+            <h3>📌 สิ่งที่ควรทำต่อไป:</h3>
+            <p>คุณสามารถแก้ไขไฟล์ <code>index.html</code> นี้ในคอมพิวเตอร์ของคุณเพื่อเปลี่ยนเนื้อหา เพิ่มข้อมูลงานวิจัย คลื่นไฟฟ้าหัวใจ (ECG) หรือใส่รูปภาพตามที่ต้องการ จากนั้นอัปโหลดไฟล์ที่แก้ไขแล้วขึ้น GitHub อีกครั้ง หน้าเว็บก็จะอัปเดตอัตโนมัติครับ</p>
+        </div>
+
+        <p>สร้างขึ้นเพื่อทดสอบการเชื่อมต่อระบบคลังโค้ดและการเปิดใช้งาน Hosting ฟรี</p>
+        
+        <div class="footer">
+            © 2026 ECGwebsite - พัฒนาโดย napatjoijinda888
+        </div>
+    </div>
+
+</body>
+</html>
